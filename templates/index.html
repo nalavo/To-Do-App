@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center py-8 px-4 font-sans">
+
+    <!-- Header Section -->
+    <div class="w-full max-w-6xl text-center mb-6">
+        <h1 class="text-3xl font-bold">Task Manager</h1>
+    
+        <!-- Absolute Top Left: Welcome + Logout -->
+        <div class="absolute top-10 left-6 text-sm text-gray-600">
+            <p class="font-medium leading-tight">Welcome, {{ current_user.username }}</p>
+            <a href="{{ url_for('logout') }}" class="text-blue-600 hover:underline">Logout</a>
+        </div>
+    </div>
+
+    <!-- Filter + Search Bar Centered -->
+    <div class="w-full max-w-6xl flex flex-wrap justify-center items-center gap-3 mb-6">
+        <!-- Filters -->
+        <div class="flex gap-2 flex-wrap justify-center">
+            <a href="{{ url_for('index') }}" class="px-3 py-1 rounded-md border text-sm text-gray-700 hover:bg-gray-100">All</a>
+            <a href="{{ url_for('index', filter='completed') }}" class="px-3 py-1 rounded-md border text-sm text-gray-700 hover:bg-gray-100">Completed</a>
+            <a href="{{ url_for('index', filter='overdue') }}" class="px-3 py-1 rounded-md border text-sm text-gray-700 hover:bg-gray-100">Overdue</a>
+            <a href="{{ url_for('index', filter='due-soon') }}" class="px-3 py-1 rounded-md border text-sm text-gray-700 hover:bg-gray-100">Due Soon</a>
+
+                <!-- Priority Dropdown -->
+        <!-- Priority Dropdown -->
+        <form method="GET" action="{{ url_for('index') }}">
+            <select name="filter" onchange="this.form.submit(); updatePriorityColor(this)"
+                id="priorityFilter"
+                class="px-3 py-1 h-8 text-sm rounded-md border text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                <option value="">Priority</option>
+                <option value="priority-low" {% if request.args.get('filter') == 'priority-low' %}selected{% endif %}>Low</option>
+                <option value="priority-medium" {% if request.args.get('filter') == 'priority-medium' %}selected{% endif %}>Medium</option>
+                <option value="priority-high" {% if request.args.get('filter') == 'priority-high' %}selected{% endif %}>High</option>
+            </select>
+        </form>
+    </div>
+        
+        <!-- Search Bar -->
+        <form method="GET" action="{{ url_for('index') }}" class="flex items-center border rounded-md px-2 py-1 w-52">
+            <input type="text" name="search" placeholder="Search"
+                class="bg-transparent outline-none text-sm w-full" />
+        </form>
+    </div>
+
+    <!-- Add Task Button (Top Right, Fixed) -->
+    <button onclick="document.getElementById('add-task-form').classList.toggle('hidden')"
+        class="fixed top-6 right-6 bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition">
+        + Add Task
+    </button>
+
+
+    <!-- Add Task Form -->
+    <div id="add-task-form" class="w-full max-w-3xl bg-white p-4 rounded-lg shadow-md mb-6 hidden">
+        <form method="POST" action="{{ url_for('add') }}" class="flex flex-col md:flex-row md:items-center gap-3">
+            
+            <input type="text" name="task" placeholder="Enter task"
+                class="w-full md:w-96 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300">
+
+            <input type="date" name="due_date" required
+                class="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300">
+
+            <button type="submit"
+                class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">Add Task</button>
+        </form>
+
+    </div>
+
+    <!-- Task List -->
+    <div class="w-full max-w-3xl space-y-3">
+        {% if tasks %}
+            {% for task in tasks %}
+                <div class="flex items-center justify-between gap-4">
+                    <!-- Task card -->
+                    <div class="relative group flex-1 p-4 rounded-lg shadow-md bg-white border">
+                        <div class="flex justify-between items-center">
+                            <!-- Task name (colored by priority) -->
+                            {% set days_left = (task.due_date - current_date).days if task.due_date else None %}
+                            <span class="text-lg font-semibold
+                                {% if days_left is not none %}
+                                    {% if days_left <= 3 %}text-red-600
+                                    {% elif days_left <= 7 %}text-yellow-500
+                                    {% else %}text-green-600
+                                    {% endif %}
+                                {% else %}text-black
+                                {% endif %}">
+                                {{ task.task }}
+                            </span>
+
+                            <!-- Due date -->
+                            {% if task.due_date %}
+                                <span class="text-sm text-gray-600">
+                                    Due {{ task.due_date.strftime('%Y-%m-%d') }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Actions (outside the card) -->
+                    <div class="flex gap-2 text-lg">
+                        <a href="{{ url_for('complete', task_id=task.id) }}" title="Complete"
+                        class="text-green-600 hover:text-green-800">✔</a>
+                        <a href="{{ url_for('edit', task_id=task.id) }}" title="Edit"
+                        class="text-yellow-500 hover:text-yellow-600">✏</a>
+                        <a href="{{ url_for('delete', task_id=task.id) }}" title="Delete"
+                        class="text-red-500 hover:text-red-600"
+                        onclick="return confirm('Delete this task?');">🗑</a>
+                    </div>
+                </div>
+            {% endfor %}
+
+        {% else %}
+            <p class="text-center text-gray-500">No tasks yet. Click "+ Add Task" to get started.</p>
+        {% endif %}
+    </div>
+   
+   <script>
+    function updatePriorityColor(select) {
+        select.classList.remove('text-red-600', 'text-yellow-500', 'text-green-600');
+
+        const val = select.value;
+        if (val === 'priority-low') {
+            select.classList.add('text-green-600');
+        } else if (val === 'priority-medium') {
+            select.classList.add('text-yellow-500');
+        } else if (val === 'priority-high') {
+            select.classList.add('text-red-600');
+        }
+    }
+
+    // Call on page load to apply correct color
+    document.addEventListener('DOMContentLoaded', () => {
+        const select = document.getElementById('priorityFilter');
+        updatePriorityColor(select);
+    });
+</script>
+ 
+</body>
+</html>

@@ -1,0 +1,95 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 40px;
+}
+input {
+    padding: 5px;
+    font-size: 16px;
+}
+button {
+    padding: 5px 10px;
+}abody {
+    font-family: Arial, sans-serif;
+    margin: 40px;
+}
+
+.add-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.add-button:hover {
+    background-color: #218838;
+}
+
+.task-form {
+    display: none;
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 12px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+input[type="text"] {
+    padding: 6px;
+    width: 200px;
+    font-size: 14px;
+}
+
+button {
+    padding: 6px 10px;
+    font-size: 14px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+ul {
+    margin-top: 100px;
+}
+
+li {
+    margin: 10px 0;
+}
+
+li {
+    position: relative;
+    padding: 5px 0;
+}
+
+.task-actions {
+    display: none;
+    position: absolute;
+    right: 0;
+}
+
+li:hover .task-actions {
+    display: inline;
+}
+
+.overdue {
+    background-color: #ffe6e6;
+    border-left: 5px solid red;
+    padding-left: 10px;
+}
